@@ -1,76 +1,58 @@
-#include <iostream>
-#include <vector>
-#include <cstdlib>
+#include <bits/stdc++.h>
 using namespace std;
 
-int partition(vector<int> &arr, int low, int high)
-{
-    int pivot = arr[low];
-    int i = low;
-    int j = high;
+int partition(int arr[], int s, int e){
 
-    while (i < j)
-    {
-        do
-        {
+    int pivot = arr[s];
+
+    int count = 0;
+    for(int i=s+1; i<=e; i++){
+        if(arr[i] < pivot) count++;
+    }
+
+    int pivotIndex = s+ count;
+    swap(arr[s], arr[pivotIndex]);
+
+    int i = s, j = e;
+    while(i<pivotIndex && j>pivotIndex){
+        while(arr[i]<pivot){
             i++;
-        } while (arr[i] <= pivot);
-
-        do
-        {
+        }
+        while(arr[j]>pivot){
             j--;
-        } while (arr[j] > pivot);
-
-        if (i < j)
-            swap(arr[i], arr[j]);
+        }
+        if(i<pivotIndex && j>pivotIndex){
+            swap(arr[i++], arr[j--]);
+        }
     }
 
-    swap(arr[low], arr[j]);
-    return j;
+    return pivotIndex;
 }
 
-void QuickSort(vector<int> &arr, int low, int high)
-{
-    if (low < high)
-    {
-        int p = partition(arr, low, high);
-        QuickSort(arr, low, p);
-        QuickSort(arr, p + 1, high);
-    }
+void quicksort(int arr[], int s, int e){
+    if(s >= e) return;
+    int p = partition(arr, s, e);
+    quicksort(arr, s, p-1);
+    quicksort(arr, p+1, e);
 }
 
-void QuickSortR(vector<int> &arr, int low, int high)
-{
-    if (low < high)
-    {
-        int random = rand() % (high - low) + low;
-        swap(arr[random], arr[low]);
-        int p = partition(arr, low, high);
-        QuickSortR(arr, low, p);
-        QuickSortR(arr, p + 1, high);
-    }
+void quicksortRandom(int arr[], int s, int e){
+    if(s >= e) return;
+    int random = rand() % (e-s) + s;
+    cout << "Random: " << random << endl;
+    swap(arr[random], arr[s]);
+    int p = partition(arr, s, e);
+    quicksortRandom(arr, s, p-1);
+    quicksortRandom(arr, p+1, e);
 }
 
-int main()
-{
-    vector<int> x = {10, 12, 15, 20, 1, 4, 17, 16, 11};
-    int low = 0;
-    int high = x.size();
-    x.push_back(1e9);
-    QuickSort(x, low, high);
-    for (auto i : x)
-        cout << i << " ";
-    cout << endl;
+int main(){
+    int arr[] = {10, 12, 15, 20, 1, 4, 17, 16, 11};
+    int n = sizeof(arr)/sizeof(arr[0]);
+    quicksortRandom(arr, 0, n-1);
 
-    int random = rand() % (high - low + 1) + low;
-    cout << random << endl;
-
-    x = {10, 12, 15, 20, 1, 4, 17, 16, 11};
-    x.push_back(1e9);
-    QuickSortR(x, low, high);
-    for (auto i : x)
-        cout << i << " ";
-    cout << endl;
-
+    for(auto x: arr){
+        cout << x << " ";
+    } cout << endl;
     return 0;
 }
