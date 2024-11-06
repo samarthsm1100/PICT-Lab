@@ -1,0 +1,5 @@
+select disk D
+select partition 1
+assign letter=Z
+active
+exit
