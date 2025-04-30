@@ -1,10 +1,7 @@
-#include <iostream>
-#include <vector>
-#include <chrono>
+#include <bits/stdc++.h>
 #include <omp.h>
 
 using namespace std;
-using namespace std::chrono;
 
 void bubbleSort(vector<int> &arr)
 {
@@ -21,7 +18,7 @@ void bubbleSort(vector<int> &arr)
     }
 }
 
-void merge(vector<int> &arr, int l, int m, int r) //merge 2 sorted subarrays
+void merge(vector<int> &arr, int l, int m, int r) 
 {
     int n1 = m - l + 1;
     int n2 = r - m;
@@ -64,7 +61,7 @@ void merge(vector<int> &arr, int l, int m, int r) //merge 2 sorted subarrays
     }
 }
 
-void mergeSort(vector<int> &arr, int l, int r) // Recursive Merge Sort 
+void mergeSort(vector<int> &arr, int l, int r) 
 {
     if (l < r)
     {
@@ -112,6 +109,7 @@ void parallelMergeSort(vector<int> &arr, int l, int r)
 
 int main()
 {
+    omp_set_num_threads(4); 
     const int size = 10000;
     vector<int> arr(size), arr_copy(size);
 
@@ -122,33 +120,46 @@ int main()
     }
 
     // Measure sequential Bubble Sort execution time
-    auto start = high_resolution_clock::now();
-    bubbleSort(arr_copy);
-    auto stop = high_resolution_clock::now();
-    auto seq_duration_bubble = duration_cast<milliseconds>(stop - start);
+    double start = omp_get_wtime();
+    bubbleSort(arr);
+    double stop = omp_get_wtime();
+    double seq_duration_bubble = stop - start;
+    arr = arr_copy;
 
     // Measure parallel Bubble Sort execution time
-    start = high_resolution_clock::now();
+    start = omp_get_wtime();
     parallelBubbleSort(arr);
-    stop = high_resolution_clock::now();
-    auto par_duration_bubble = duration_cast<milliseconds>(stop - start);
+    stop = omp_get_wtime();
+    double par_duration_bubble = stop - start;
+    arr = arr_copy;
 
     // Measure sequential Merge Sort execution time
-    start = high_resolution_clock::now();
-    mergeSort(arr_copy, 0, size - 1);
-    stop = high_resolution_clock::now();
-    auto seq_duration_merge = duration_cast<milliseconds>(stop - start);
+    start = omp_get_wtime();
+    mergeSort(arr, 0, size - 1);
+    stop = omp_get_wtime();
+    double seq_duration_merge = stop - start;
+    arr = arr_copy;
 
     // Measure parallel Merge Sort execution time
-    start = high_resolution_clock::now();
+    start = omp_get_wtime();
     parallelMergeSort(arr, 0, size - 1);
-    stop = high_resolution_clock::now();
-    auto par_duration_merge = duration_cast<milliseconds>(stop - start);
+    stop = omp_get_wtime();
+    double par_duration_merge = stop - start;
+    arr = arr_copy;
 
-    cout << "Sequential Bubble Sort Time: " << seq_duration_bubble.count() << " milliseconds" << endl;
-    cout << "Parallel Bubble Sort Time: " << par_duration_bubble.count() << " milliseconds" << endl;
-    cout << "Sequential Merge Sort Time: " << seq_duration_merge.count() << " milliseconds" << endl;
-    cout << "Parallel Merge Sort Time: " << par_duration_merge.count() << " milliseconds" << endl;
-
+    cout << "Total number of threads: " << omp_get_max_threads() << endl << endl;
+    cout << "====================================================" << endl << endl;
+    cout << "Sequential Bubble Sort Time: " << seq_duration_bubble * 1e6 << " milliseconds" << endl << endl;
+    cout << "Parallel Bubble Sort Time: " << par_duration_bubble * 1e6 << " milliseconds" << endl << endl;
+    cout << "Sequential Merge Sort Time: " << seq_duration_merge * 1e6 << " milliseconds" << endl << endl;
+    cout << "Parallel Merge Sort Time: " << par_duration_merge * 1e6 << " milliseconds" << endl << endl;
+    cout << "====================================================" << endl << endl;
+    cout << "Speedup for Bubble Sort: " << seq_duration_bubble / par_duration_bubble << endl;
+    cout << "Speedup for Merge Sort: " << seq_duration_merge / par_duration_merge << endl << endl;
+    cout << "====================================================" << endl << endl;
+    cout << "Note: The time is in microseconds." << endl;
+    cout << "The time complexity of Bubble Sort is O(n^2) and Merge Sort is O(n log n)." << endl;
+    cout << "The parallel time complexity of Bubble Sort is O(n^2/p) and Merge Sort is O(n log n/p)." << endl;
+    
     return 0;
 }
