@@ -149,17 +149,17 @@ int main()
 
     cout << "Total number of threads: " << omp_get_max_threads() << endl << endl;
     cout << "====================================================" << endl << endl;
-    cout << "Sequential Bubble Sort Time: " << seq_duration_bubble * 1e6 << " milliseconds" << endl << endl;
-    cout << "Parallel Bubble Sort Time: " << par_duration_bubble * 1e6 << " milliseconds" << endl << endl;
-    cout << "Sequential Merge Sort Time: " << seq_duration_merge * 1e6 << " milliseconds" << endl << endl;
-    cout << "Parallel Merge Sort Time: " << par_duration_merge * 1e6 << " milliseconds" << endl << endl;
+    cout << "Sequential Bubble Sort Time: " << seq_duration_bubble * 1e6 << " microseconds" << endl << endl;
+    cout << "Parallel Bubble Sort Time: " << par_duration_bubble * 1e6 << " microseconds" << endl << endl;
+    cout << "Sequential Merge Sort Time: " << seq_duration_merge * 1e6 << " microseconds" << endl << endl;
+    cout << "Parallel Merge Sort Time: " << par_duration_merge * 1e6 << " microseconds" << endl << endl;
     cout << "====================================================" << endl << endl;
-    cout << "Speedup for Bubble Sort: " << seq_duration_bubble / par_duration_bubble << endl;
+    cout << "Speedup for Bubble Sort: " << seq_duration_bubble / par_duration_bubble << endl << endl;
     cout << "Speedup for Merge Sort: " << seq_duration_merge / par_duration_merge << endl << endl;
     cout << "====================================================" << endl << endl;
     cout << "Note: The time is in microseconds." << endl;
     cout << "The time complexity of Bubble Sort is O(n^2) and Merge Sort is O(n log n)." << endl;
-    cout << "The parallel time complexity of Bubble Sort is O(n^2/p) and Merge Sort is O(n log n/p)." << endl;
-    
+    cout << "The parallel time complexity of Bubble Sort is O(n^2/p) and Merge Sort is O(n log n/p)." << endl << endl;
+
     return 0;
 }
