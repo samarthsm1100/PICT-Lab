@@ -1,7 +1,6 @@
 #include <bits/stdc++.h>
 #include <omp.h>
 using namespace std;
-using namespace std::chrono;
 
 class Graph
 {
@@ -75,26 +74,21 @@ public:
             int u;
             #pragma omp parallel shared(q, visited)
             {
-                cout << "Thread : " << omp_get_thread_num() << " | Has code entered parallel region" << omp_in_parallel() << endl;
-                cout << "Thread : " << omp_get_thread_num() << " | Number of threads in parallel region: " << omp_get_num_threads() << endl;
-                #pragma omp single
+#                pragma omp single
                 {
-                    cout << "Thread : " << omp_get_thread_num() << " | Inside SINGLE Section" << endl;
                     u = q.front();
                     q.pop();
-                    cout << "Thread : " << omp_get_thread_num() << " | Vertex : " << u << endl;
+                    cout << u << " ";
                 }
                 if (!(adj[u].size() == 0))
                 {
                     #pragma omp for
                     for (int i = 0; i <= adj[u].size() - 1; ++i)
                     {
-                        cout << "Thread : " << omp_get_thread_num() << " | Iteration : " << i << endl;
                         if (!visited[adj[u][i]])
                         {
                             #pragma omp critical
                             {
-                                cout << "Thread : " << omp_get_thread_num() << " | Inside Critical Section" << endl;
                                 q.push(adj[u][i]);
                                 visited[adj[u][i]] = true;
                             }
@@ -130,14 +124,7 @@ public:
 
 int main()
 {
-    omp_set_num_threads(4);
-    #pragma omp parallel
-    {
-        int tid = omp_get_thread_num();
-        int total = omp_get_num_threads();
-        cout << "Thread " << tid << " out of " << total << endl;
-    }
-
+    omp_set_num_threads(4);  
     int num_vertices, num_edges, source;
     cout << "Enter the number of vertices in the graph: ";
     cin >> num_vertices;
@@ -157,44 +144,45 @@ int main()
     cout << "Enter the starting vertex for BFS and DFS: ";
     cin >> source;
 
+    cout << "\nNumber of threads : " << omp_get_max_threads() << endl << endl;
+
     // Sequential BFS
-    auto start = high_resolution_clock::now();
+    double start = omp_get_wtime();  
     cout << "Sequential Breadth First Search (BFS) starting from vertex " << source << ": ";
     g.sequentialBFS(source);
     cout << endl;
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
-    cout << "Time taken by sequential BFS: " << duration.count() << " microseconds" << endl;
+    double stop = omp_get_wtime();   
+    
+    double duration = stop - start;  
+    cout << "Time taken by sequential BFS: " << duration * 1e6 << " microseconds" << endl << endl;;  
+    
 
-    cout << endl << endl << endl;
-
-    // // Sequential DFS
-    // start = high_resolution_clock::now();
-    // cout << "Sequential Depth First Search (DFS) starting from vertex " << source << ": ";
-    // g.sequentialDFS(source);
-    // cout << endl;
-    // stop = high_resolution_clock::now();
-    // duration = duration_cast<microseconds>(stop - start);
-    // cout << "Time taken by sequential DFS: " << duration.count() << " microseconds" << endl;
+    // Sequential DFS
+    start = omp_get_wtime();
+    cout << "Sequential Depth First Search (DFS) starting from vertex " << source << ": ";
+    g.sequentialDFS(source);
+    cout << endl;
+    stop = omp_get_wtime();
+    duration = stop - start;
+    cout << "Time taken by sequential DFS: " << duration * 1e6 << " microseconds" << endl << endl;;
 
     // Parallel BFS
-    start = high_resolution_clock::now();
+    start = omp_get_wtime();
     cout << "Parallel Breadth First Search (BFS) starting from vertex " << source << ": ";
     g.parallelBFS(source);
     cout << endl;
-    stop = high_resolution_clock::now();
-    duration = duration_cast<microseconds>(stop - start);
-    cout << "Time taken by parallel BFS: " << duration.count() << " microseconds" << endl;
+    stop = omp_get_wtime();
+    duration = stop - start;
+    cout << "Time taken by parallel BFS: " << duration * 1e6 << " microseconds" << endl << endl;
 
-
-    // // Parallel DFS
-    // start = high_resolution_clock::now();
-    // cout << "Parallel Depth First Search (DFS) starting from vertex " << source << ": ";
-    // g.parallelDFS(source);
-    // cout << endl;
-    // stop = high_resolution_clock::now();
-    // duration = duration_cast<microseconds>(stop - start);
-    // cout << "Time taken by parallel DFS: " << duration.count() << " microseconds" << endl;
+    // Parallel DFS
+    start = omp_get_wtime();
+    cout << "Parallel Depth First Search (DFS) starting from vertex " << source << ": ";
+    g.parallelDFS(source);
+    cout << endl;
+    stop = omp_get_wtime();
+    duration = stop - start;
+    cout << "Time taken by parallel DFS: " << duration * 1e6 << " microseconds" << endl << endl;
 
     return 0;
 }
