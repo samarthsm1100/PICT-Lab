@@ -22,18 +22,27 @@ void bubbleSort(vector<int>&vec){
     display(vec);
 }
 
-void parallelBubbleSort(vector<int>&vec){
-    int n = vec.size();
-    for(int i=0; i<n-1; i++){
-        #pragma omp parallel for
-        for(int j=0; j<n-i-1; j++){
-            if(vec[j]>vec[j+1]){
-                swap(vec[j], vec[j+1]);
+void parallelBubbleSort(vector<int> &arr)
+{
+    int n = arr.size();
+
+    for (int i = 0; i < n; ++i)
+    {
+        int start = i % 2;
+        #pragma omp parallel for default(none) shared(arr, n, start)
+        for (int j = start; j < n - 1; j += 2)
+        {
+            if (arr[j] > arr[j + 1])
+            {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
             }
         }
     }
-    display(vec);
+    display(arr);
 }
+
 
 void merge(vector<int>&vec, int l, int m, int r){
     int n1 = m-l+1;

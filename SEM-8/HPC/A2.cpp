@@ -77,14 +77,18 @@ void mergeSort(vector<int> &arr, int l, int r)
 void parallelBubbleSort(vector<int> &arr)
 {
     int n = arr.size();
-    for (int i = 0; i < n - 1; ++i)
+
+    for (int i = 0; i < n; ++i)
     {
-        #pragma omp parallel for
-        for (int j = 0; j < n - i - 1; ++j)
+        int start = i % 2;
+        #pragma omp parallel for default(none) shared(arr, n, start)
+        for (int j = start; j < n - 1; j += 2)
         {
             if (arr[j] > arr[j + 1])
             {
-                swap(arr[j], arr[j + 1]);
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
             }
         }
     }
