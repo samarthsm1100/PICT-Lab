@@ -1,5 +1,5 @@
-#include <bits/stdc++.h>
-
+#include <iostream>
+#include <cuda_runtime.h>
 using namespace std;
 using namespace std::chrono;
 
@@ -76,6 +76,7 @@ int main() {
     // Parallel addition
     start = high_resolution_clock::now();
     add<<<blocksPerGrid, threadsPerBlock>>>(X, Y, Z, N);
+    cudaDeviceSynchronize();
     cudaMemcpy(C, Z, vectorBytes, cudaMemcpyDeviceToHost);
     stop = high_resolution_clock::now();
     auto par_duration = duration_cast<microseconds>(stop - start);

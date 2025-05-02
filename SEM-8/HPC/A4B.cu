@@ -1,5 +1,5 @@
-#include <bits/stdc++.h>
-
+#include <iostream>
+#include <cuda_runtime.h>
 using namespace std;
 using namespace std::chrono;
 
