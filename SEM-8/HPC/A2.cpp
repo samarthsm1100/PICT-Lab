@@ -145,10 +145,17 @@ int main()
     arr = arr_copy;
 
     // Measure parallel Merge Sort execution time
-    start = omp_get_wtime();
-    parallelMergeSort(arr, 0, size - 1);
-    stop = omp_get_wtime();
-    double par_duration_merge = stop - start;
+    double par_duration_merge
+    #pragma omp parallel
+    {
+        #pragma omp single
+        {
+            start = omp_get_wtime();
+            parallelMergeSort(arr, 0, size - 1);
+            stop = omp_get_wtime();
+            par_duration_merge = stop - start;
+        }
+    }
     arr = arr_copy;
 
     cout << "Total number of threads: " << omp_get_max_threads() << endl << endl;
