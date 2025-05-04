@@ -145,7 +145,7 @@ int main()
     arr = arr_copy;
 
     // Measure parallel Merge Sort execution time
-    double par_duration_merge
+    double par_duration_merge;
     #pragma omp parallel
     {
         #pragma omp single
