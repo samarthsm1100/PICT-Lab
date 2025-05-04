@@ -2,151 +2,131 @@
 #include <omp.h>
 using namespace std;
 
-void bubbleSort(vector<int>& arr) {
-    int n = arr.size();
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - 1; j++) {
-            if (arr[j] > arr[j + 1]) {
-                swap(arr[j], arr[j + 1]);
-            }
-        }
+int minimum_sequential(int arr[], int n){
+    int minval = arr[0];
+    for(int i=1; i<n; i++){
+        if(arr[i]<minval) minval = arr[i];
     }
+    return minval;
 }
 
-void merge(int l, int m, int r, vector<int>& arr) {
-    int n1 = m - l + 1;
-    int n2 = r - m;
-
-    vector<int> L(n1), R(n2);
-
-    for (int i = 0; i < n1; i++)
-        L[i] = arr[l + i];
-    for (int j = 0; j < n2; j++)
-        R[j] = arr[m + 1 + j];
-
-    int i = 0, j = 0, k = l;
-    while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) {
-            arr[k] = L[i];
-            i++;
-        } else {
-            arr[k] = R[j];
-            j++;
-        }
-        k++;
+int maximum_sequential(int arr[], int n){
+    int maxval = arr[0];
+    for(int i=1; i<n; i++){
+        if(arr[i]>maxval) maxval = arr[i];
     }
-
-    while (i < n1) {
-        arr[k] = L[i];
-        i++;
-        k++;
-    }
-
-    while (j < n2) {
-        arr[k] = R[j];
-        j++;
-        k++;
-    }
+    return maxval;
 }
 
-void mergeSort(int l, int r, vector<int>& arr) {
-    if (l < r) {
-        int m = l + (r - l) / 2;
-        mergeSort(l, m, arr);
-        mergeSort(m + 1, r, arr);
-        merge(l, m, r, arr);
+int sum_sequential(int arr[], int n){
+    int sum = 0;
+    for(int i=0; i<n; i++){
+        sum += arr[i];
     }
+    return sum;
 }
 
-void parallelBubble(vector<int>& arr) {
-    int n = arr.size();
-    for (int i = 0; i < n; i++) {
-        int start = i % 2;
-        #pragma omp parallel for shared(arr, n, start)
-        for (int j = start; j < n - 1; j += 2) {
-            if (arr[j] > arr[j + 1]) {
-                int temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
-            }
-        }
-    }
+double average_sequential(int arr[], int n){
+    return (double)sum_sequential(arr,n)/n;
 }
 
-void parallelMerge(vector<int>& arr, int l, int r) {
-    if (l < r) {
-        int m = l + (r - l) / 2;
-        #pragma omp parallel sections
-        {
-            #pragma omp section
-            parallelMerge(arr, l, m);
-            #pragma omp section
-            parallelMerge(arr, m + 1, r);
-        }
-        merge(l, m, r, arr);
+int minimum_parallel(int arr[], int n){
+    int minval = arr[0];
+    #pragma omp parallel for reduction(min: minval)
+    for(int i=0; i<n; i++){
+        if(arr[i]<minval) minval = arr[i];
     }
+    return minval;
 }
 
-bool isSorted(vector<int>&vec){
-    for(int i=1; i<vec.size(); i++){
-        if(vec[i]<vec[i-1]){
-            return false;
-        }
+int maximum_parallel(int arr[], int n){
+    int maxval = arr[0];
+    #pragma omp parallel for reduction(max: maxval)
+    for(int i=0; i<n; i++){
+        if(arr[i]>maxval) maxval = arr[i];
     }
-    return true;
+    return maxval;
 }
 
-int main() {
-    int n = 10000;
-    vector<int> arr(n), arr_copy(n);
-
-    for (int i = 0; i < n; i++) {
-        arr[i] = rand() % 1000;
-        arr_copy[i] = arr[i];
+int sum_parallel(int arr[], int n){
+    int sum = 0;
+    #pragma omp parallel for reduction(+: sum)
+    for(int i=0; i<n; i++){
+        sum += arr[i];
     }
+    return sum;
+}
 
+double average_parallel(int arr[], int n){
+    return (double)sum_parallel(arr,n)/n;
+}
 
+int main() 
+{
+    omp_set_num_threads(8);
+  int n;
+  cout << "Enter the number of elements: ";
+  cin >> n;
+  int arr[n];
+  cout << "Enter the elements: ";
+  for(int i = 0; i < n; i++) 
+  {
+    cin >> arr[i];
+  }
 
-    double start = omp_get_wtime();
-    bubbleSort(arr);
-    double stop = omp_get_wtime();
-    double bub = stop - start;
-    cout << isSorted(arr);
-    arr = arr_copy;
+  double start = omp_get_wtime();
+  cout << "\nThe minimum value (sequential) is: " << minimum_sequential(arr, n) << '\n';
+  double stop = omp_get_wtime();
+  double duration1 = stop - start;
+  cout << "Time taken by sequential minval: " << duration1 * 1e6 << " microseconds" << endl;
 
-    start = omp_get_wtime();
-    mergeSort(0, n - 1, arr);
-    stop = omp_get_wtime();
-    double merge = stop - start;
-    cout << isSorted(arr);
-    arr = arr_copy;
+  start = omp_get_wtime();
+  cout << "\nThe maximum value (sequential) is: " << maximum_sequential(arr, n) << '\n';
+  stop = omp_get_wtime();
+  double duration2 = stop - start;
+  cout << "Time taken by sequential maxval: " << duration2 * 1e6 << " microseconds" << endl;
 
-    start = omp_get_wtime();
-    parallelBubble(arr);
-    stop = omp_get_wtime();
-    double par_bub = stop - start;
-    cout << isSorted(arr);
-    arr = arr_copy;
+  start = omp_get_wtime();
+  cout << "\nThe summation (sequential) is: " << sum_sequential(arr, n) << '\n';
+  stop = omp_get_wtime();
+  double duration3 = stop - start;
+  cout << "Time taken by sequential sum: " << duration3 * 1e6 << " microseconds" << endl;
 
-    double par_merge;
-    #pragma omp parallel
-    {
-        #pragma omp single
-        {
-            start = omp_get_wtime();
-            parallelMerge(arr, 0, n - 1);
-            stop = omp_get_wtime();
-            par_merge = stop - start;
-        }
-    }
-    cout << isSorted(arr);
+  start = omp_get_wtime();
+  cout << "\nThe average (sequential) is: " << average_sequential(arr, n) << '\n';
+  stop = omp_get_wtime();
+  double duration4 = stop - start;
+  cout << "Time taken by sequential average: " << duration4 * 1e6 << " microseconds" << endl;
 
-    cout << endl;
+  start = omp_get_wtime();
+  cout << "\nThe minimum value (parallel) is: " << minimum_parallel(arr, n) << '\n';
+  stop = omp_get_wtime();
+  double duration5 = stop - start;
+  cout << "Time taken by parallel minval: " << duration5 * 1e6 << " microseconds" << endl;
 
-    cout << "Seq bubble: " << bub * 1e6 << endl;
-    cout << "Seq merge: " << merge * 1e6 << endl;
-    cout << "Par bubble: " << par_bub * 1e6 << endl;
-    cout << "Par merge: " << par_merge * 1e6 << endl;
+  start = omp_get_wtime();
+  cout << "\nThe maximum value (parallel) is: " << maximum_parallel(arr, n) << '\n';
+  stop = omp_get_wtime();
+  double duration6 = stop - start;
+  cout << "Time taken by parallel maxval: " << duration6 * 1e6 << " microseconds" << endl;
 
-    return 0;
+  start = omp_get_wtime();
+  cout << "\nThe summation (parallel) is: " << sum_parallel(arr, n) << '\n';
+  stop = omp_get_wtime();
+  double duration7 = stop - start;
+  cout << "Time taken by parallel sum: " << duration7 * 1e6 << " microseconds" << endl;
+
+  start = omp_get_wtime();
+  cout << "\nThe average (parallel) is: " << average_parallel(arr, n) << '\n';
+  stop = omp_get_wtime();
+  double duration8 = stop - start;
+  cout << "Time taken by parallel average: " << duration8 * 1e6 << " microseconds" << endl;
+
+  cout << "\n----------------- SPEEDUP --------------------\n";
+  cout << "Minval: " << duration1/duration5 << endl;
+  cout << "Maxval: " << duration2/duration6 << endl;
+  cout << "Summation: " << duration3/duration7 << endl;
+  cout << "Average: " << duration4/duration8 << endl;
+
+  return 0;  
 }
